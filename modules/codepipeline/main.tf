@@ -31,7 +31,7 @@ resource "aws_codepipeline" "terraform_pipeline" {
       configuration = {
         RepositoryName       = var.source_repo_name
         BranchName           = var.source_repo_branch
-        PollForSourceChanges = "false"
+        PollForSourceChanges = "true"
       }
     }
   }

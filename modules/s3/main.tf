@@ -21,7 +21,6 @@ resource "aws_s3_bucket_versioning" "codepipeline_bucket_versioning" {
   bucket = aws_s3_bucket.codepipeline_bucket.id
   versioning_configuration {
     status     = "Enabled"
-    mfa_delete = "Enabled"
   }
 }
 

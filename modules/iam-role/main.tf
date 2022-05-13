@@ -27,6 +27,7 @@ EOF
   path               = "/"
 }
 
+# TO-DO : replace all * with resource names / arn
 resource "aws_iam_policy" "codepipeline_policy" {
   name        = "${var.project_name}-codepipeline-policy"
   description = "Policy to allow codepipeline to execute"
@@ -49,6 +50,13 @@ resource "aws_iam_policy" "codepipeline_policy" {
     {
       "Effect": "Allow",
       "Action": [
+         "kms:*"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
          "codecommit:GitPull",
          "codecommit:GitPush",
          "codecommit:GetBranch",
@@ -62,7 +70,7 @@ resource "aws_iam_policy" "codepipeline_policy" {
          "codecommit:ListBranches",
          "codecommit:UploadArchive"
       ],
-      "Resource": "*"
+      "Resource": "arn:aws:codecommit:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:${var.source_repository_name}"
     },
     {
       "Effect": "Allow",
@@ -73,7 +81,7 @@ resource "aws_iam_policy" "codepipeline_policy" {
         "codebuild:CreateReport",
         "codebuild:BatchGetProjects"
       ],
-      "Resource": "*"
+      "Resource": "arn:aws:codecommit:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:${var.source_repository_name}"
     },
     {
       "Effect": "Allow",
@@ -87,6 +95,11 @@ resource "aws_iam_policy" "codepipeline_policy" {
   ]
 }
 EOF
+}
+
+resource "aws_iam_role_policy_attachment" "codepipeline_role_attach" {
+  role       = aws_iam_role.codepipeline_role.name
+  policy_arn = aws_iam_policy.codepipeline_policy.arn
 }
 
 resource "aws_accessanalyzer_analyzer" "codepipeline_analyzer" {

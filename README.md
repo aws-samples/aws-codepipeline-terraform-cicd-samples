@@ -3,6 +3,60 @@ This pattern demonstrates setting up AWS CodePipeline, AWS CodeBuild projects an
 S3 or any other Remote backends used for Terraform state management which allows multiple engineers to work together to develop the infrastructure
 The created pipeline enforces validation (tflint, tfsec and checkov scans) for the code.
 
+## Directory Structure
+```shell
+|-- CODE_OF_CONDUCT.md
+|-- CONTRIBUTING.md
+|-- LICENSE
+|-- README.md
+|-- data.tf
+|-- examples
+|   `-- terraform.tfvars
+|-- locals.tf
+|-- main.tf
+|-- modules
+|   |-- codebuild
+|   |   |-- README.md
+|   |   |-- main.tf
+|   |   |-- outputs.tf
+|   |   `-- variables.tf
+|   |-- codecommit
+|   |   |-- README.md
+|   |   |-- data.tf
+|   |   |-- main.tf
+|   |   |-- outputs.tf
+|   |   `-- variables.tf
+|   |-- codepipeline
+|   |   |-- README.md
+|   |   |-- main.tf
+|   |   |-- outputs.tf
+|   |   `-- variables.tf
+|   |-- iam-role
+|   |   |-- README.md
+|   |   |-- data.tf
+|   |   |-- main.tf
+|   |   |-- outputs.tf
+|   |   `-- variables.tf
+|   |-- kms
+|   |   |-- README.md
+|   |   |-- main.tf
+|   |   |-- outputs.tf
+|   |   `-- variables.tf
+|   `-- s3
+|       |-- README.md
+|       |-- main.tf
+|       |-- outputs.tf
+|       `-- variables.tf
+|-- templates
+|   |-- buildspec_apply.yml
+|   |-- buildspec_destroy.yml
+|   |-- buildspec_plan.yml
+|   |-- buildspec_validate.yml
+|   `-- scripts
+|       `-- tf_ssp_validation.sh
+`-- variables.tf
+
+```
 ## Installation
 
 #### Step 1: Clone this repository.
@@ -13,7 +67,7 @@ git@github.com:aws-samples/aws-codepipeline-terraform-cicd-samples.git
 Note: If you don't have git installed, [install git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 
 
-#### Step 2: Update the variables in terraform.tfvars based on your requirement. Make sure you ae updating the variables project_name, environment, source_repo_name, source_repo_branch, create_new_repo, stage_input and build_projects.
+#### Step 2: Update the variables in `examples/terraform.tfvars` based on your requirement. Make sure you ae updating the variables project_name, environment, source_repo_name, source_repo_branch, create_new_repo, stage_input and build_projects.
 
 - If you are planning to use an existing terraform CodeCommit repository, then update the variable create_new_repo as false and provide the name of your existing repo under the variable source_repo_name
 - If you are planning to create new terraform CodeCommit repository, then update the variable create_new_repo as true and provide the name of your new repo under the variable source_repo_name
