@@ -80,7 +80,7 @@ Note: If you don't have git installed, [install git](https://git-scm.com/book/en
 
 #### Step 6: Start a Terraform run using the command terraform apply
 
-Note: Sample terraform.tfvars and backend.conf are available in the examples directory
+Note: Sample terraform.tfvars are available in the examples directory
 
 ##Pre-Requisites
 
@@ -103,7 +103,7 @@ Note: If you don't have git installed, [install git](https://git-scm.com/book/en
 
 #### Step 5: Trigger the pipeline created in the Installation step.
 
-
+Note: The IAM Role used by the newly created pipeline is very restrictive and follows the Principle of least privilege. Please update the IAM Policy with the required permissions.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
