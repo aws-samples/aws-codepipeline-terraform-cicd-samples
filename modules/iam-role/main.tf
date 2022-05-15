@@ -50,9 +50,13 @@ resource "aws_iam_policy" "codepipeline_policy" {
     {
       "Effect": "Allow",
       "Action": [
-         "kms:*"
+         "kms:DescribeKey",
+         "kms:GenerateDataKey*",
+         "kms:Encrypt",
+         "kms:ReEncrypt*",
+         "kms:Decrypt"
       ],
-      "Resource": "*"
+      "Resource": "${var.kms_key_arn}"
     },
     {
       "Effect": "Allow",
@@ -77,11 +81,17 @@ resource "aws_iam_policy" "codepipeline_policy" {
       "Action": [
         "codebuild:BatchGetBuilds",
         "codebuild:StartBuild",
-        "codebuild:CreateReportGroup",
-        "codebuild:CreateReport",
         "codebuild:BatchGetProjects"
       ],
-      "Resource": "arn:aws:codecommit:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:${var.source_repository_name}"
+      "Resource": "arn:aws:codebuild:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:project/${var.project_name}*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "codebuild:CreateReportGroup",
+        "codebuild:CreateReport"
+      ],
+      "Resource": "arn:aws:codebuild:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:report-group/${var.project_name}*"
     },
     {
       "Effect": "Allow",

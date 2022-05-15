@@ -52,7 +52,7 @@ resource "aws_codepipeline" "terraform_pipeline" {
         run_order        = index(var.stages, stage.value) + 2
 
         configuration = {
-          ProjectName = stage.value["build_name"]
+          ProjectName = stage.value["provider"] == "CodeBuild" ? "${var.project_name}-${stage.value["name"]}" : null
         }
       }
     }

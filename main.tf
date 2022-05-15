@@ -78,9 +78,10 @@ module "codepipeline_kms" {
 }
 
 module "codepipeline_iam_role" {
-  source       = "./modules/iam-role"
-  project_name = var.project_name
+  source                 = "./modules/iam-role"
+  project_name           = var.project_name
   source_repository_name = var.source_repo_name
+  kms_key_arn  = module.codepipeline_kms.arn
   tags = {
     Project_Name = var.project_name
     Environment  = var.environment
