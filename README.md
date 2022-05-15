@@ -117,7 +117,7 @@ Note: If you don't have git installed, [install git](https://git-scm.com/book/en
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.8.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.14.0 |
 
 ## Modules
 
@@ -144,9 +144,9 @@ Note: If you don't have git installed, [install git](https://git-scm.com/book/en
 | <a name="input_build_project_source"></a> [build\_project\_source](#input\_build\_project\_source) | aws/codebuild/standard:4.0 | `string` | `"CODEPIPELINE"` | no |
 | <a name="input_build_projects"></a> [build\_projects](#input\_build\_projects) | Tags to be attached to the CodePipeline | `list(string)` | n/a | yes |
 | <a name="input_builder_compute_type"></a> [builder\_compute\_type](#input\_builder\_compute\_type) | Relative path to the Apply and Destroy build spec file | `string` | `"BUILD_GENERAL1_SMALL"` | no |
-| <a name="input_builder_image"></a> [builder\_image](#input\_builder\_image) | aws/codebuild/standard:4.0 | `string` | `"aws/codebuild/standard:4.0"` | no |
-| <a name="input_builder_image_pull_credentials_type"></a> [builder\_image\_pull\_credentials\_type](#input\_builder\_image\_pull\_credentials\_type) | aws/codebuild/standard:4.0 | `string` | `"CODEBUILD"` | no |
-| <a name="input_builder_type"></a> [builder\_type](#input\_builder\_type) | aws/codebuild/standard:4.0 | `string` | `"LINUX_CONTAINER"` | no |
+| <a name="input_builder_image"></a> [builder\_image](#input\_builder\_image) | Docker Image to be used by codebuild | `string` | `"aws/codebuild/amazonlinux2-x86_64-standard:3.0"` | no |
+| <a name="input_builder_image_pull_credentials_type"></a> [builder\_image\_pull\_credentials\_type](#input\_builder\_image\_pull\_credentials\_type) | Image pull credentials type used by codebuild project | `string` | `"CODEBUILD"` | no |
+| <a name="input_builder_type"></a> [builder\_type](#input\_builder\_type) | Type of codebuild run environment | `string` | `"LINUX_CONTAINER"` | no |
 | <a name="input_create_new_repo"></a> [create\_new\_repo](#input\_create\_new\_repo) | Whether to create a new repository. Values are true or false. Defaulted to true always. | `bool` | `true` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | Environment in which the script is run. Eg: dev, prod, etc | `string` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | Unique name for this project | `string` | n/a | yes |
