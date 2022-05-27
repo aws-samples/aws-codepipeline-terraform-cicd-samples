@@ -1,4 +1,4 @@
-project_name       = "terraform_CICD999"
+project_name       = "terraform_project"
 environment        = "dev"
 source_repo_name   = "terraform-repo-cicd"
 source_repo_branch = "master"
