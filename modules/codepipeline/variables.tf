@@ -21,7 +21,6 @@ variable "s3_bucket_name" {
 variable "codepipeline_role_arn" {
   description = "ARN of the codepipeline IAM role"
   type        = string
-  default     = ""
 }
 
 variable "kms_key_arn" {

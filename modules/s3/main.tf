@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "codepipeline_bucket" {
-  bucket        = "${var.project_name}-artifact-bucket"
+  bucket_prefix = regex("[a-z0-9.-]+", lower(var.project_name))
   tags          = var.tags
   force_destroy = true
 }
@@ -20,8 +20,7 @@ resource "aws_s3_bucket_acl" "codepipeline_bucket_acl" {
 resource "aws_s3_bucket_versioning" "codepipeline_bucket_versioning" {
   bucket = aws_s3_bucket.codepipeline_bucket.id
   versioning_configuration {
-    status     = "Enabled"
-    mfa_delete = "Enabled"
+    status = "Enabled"
   }
 }
 
