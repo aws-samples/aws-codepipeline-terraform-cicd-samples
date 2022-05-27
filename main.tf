@@ -29,9 +29,10 @@ module "s3_artifacts_bucket" {
 module "codecommit_infrastructure_source_repo" {
   source = "./modules/codecommit"
 
-  create_new_repo        = var.create_new_repo
-  source_repository_name = var.source_repo_name
-  kms_key_arn            = module.codepipeline_kms.arn
+  create_new_repo          = var.create_new_repo
+  source_repository_name   = var.source_repo_name
+  source_repository_branch = var.source_repo_branch
+  kms_key_arn              = module.codepipeline_kms.arn
   tags = {
     Project_Name = var.project_name
     Environment  = var.environment

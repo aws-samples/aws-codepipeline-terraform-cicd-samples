@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "codepipeline_bucket" {
-  bucket_prefix = var.project_name
+  bucket_prefix = regex("[a-z0-9.-]+", lower(var.project_name))
   tags          = var.tags
   force_destroy = true
 }

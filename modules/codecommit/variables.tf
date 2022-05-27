@@ -6,7 +6,12 @@ variable "create_new_repo" {
 
 variable "source_repository_name" {
   type        = string
-  description = "Name of the Source CodeCommit repository"
+  description = "Name of the Source CodeCommit repository used by the pipeline"
+}
+
+variable "source_repository_branch" {
+  type        = string
+  description = "Branch of the Source CodeCommit repository used in pipeline"
 }
 
 variable "tags" {

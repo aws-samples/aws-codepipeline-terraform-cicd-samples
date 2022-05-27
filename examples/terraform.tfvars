@@ -1,7 +1,7 @@
-project_name       = "terraform-cicd"
+project_name       = "terraform_CICD999"
 environment        = "dev"
 source_repo_name   = "terraform-repo-cicd"
-source_repo_branch = "main"
+source_repo_branch = "master"
 create_new_repo    = true
 create_new_role    = true
 #codepipeline_iam_role_name = <Role name> - Use this to specify the role name to be used by codepipeline if the create_new_role flag is set to false.
