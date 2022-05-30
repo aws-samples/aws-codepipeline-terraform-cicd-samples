@@ -14,6 +14,11 @@ variable "source_repository_branch" {
   description = "Branch of the Source CodeCommit repository used in pipeline"
 }
 
+variable "repo_approvers_arn" {
+  description = "ARN or ARN pattern for the IAM User/Role/Group etc that can be used for approving Pull Requests"
+  type        = string
+}
+
 variable "tags" {
   type        = map(any)
   description = "Tags to be attached to the source CodeCommit repository"

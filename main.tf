@@ -32,6 +32,7 @@ module "codecommit_infrastructure_source_repo" {
   create_new_repo          = var.create_new_repo
   source_repository_name   = var.source_repo_name
   source_repository_branch = var.source_repo_branch
+  repo_approvers_arn       = var.repo_approvers_arn
   kms_key_arn              = module.codepipeline_kms.arn
   tags = {
     Project_Name = var.project_name

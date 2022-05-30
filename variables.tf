@@ -33,6 +33,11 @@ variable "source_repo_branch" {
   type        = string
 }
 
+variable "repo_approvers_arn" {
+  description = "ARN or ARN pattern for the IAM User/Role/Group that can be used for approving Pull Requests"
+  type        = string
+}
+
 variable "environment" {
   description = "Environment in which the script is run. Eg: dev, prod, etc"
   type        = string
