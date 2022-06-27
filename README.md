@@ -1,7 +1,15 @@
 # AWS CodePipeline CI/CD example
-This pattern demonstrates setting up AWS CodePipeline, AWS CodeBuild projects and other requirements using terraform IaC which shows an example of how to automate the validation, plan, approval based apply and destroy of terraform code.
-S3 or any other Remote backends used for Terraform state management which allows multiple engineers to work together to develop the infrastructure
-The created pipeline enforces validation (tflint, tfsec and checkov scans) for the code.
+Terraform is an infrastructure-as-code (IaC) tool that helps you create, update, and version your infrastructure in a secure and repeatable manner.
+
+The scope of this pattern is to provide a guide and ready to use terraform configurations to setup validation pipelines with end-to-end tests based on AWS CodePipeline, AWS CodeBuild, AWS CodeCommit and Terraform. 
+
+The created pipeline uses the best practices for infrastructure validation and has the below stages
+
+- validate - This stage focuses on terraform IaC validation tools and commands such as terraform validate, terraform format, tfsec, tflint and checkov
+- plan - This stage creates an execution plan, which lets you preview the changes that Terraform plans to make to your infrastructure.
+- apply - This stage uses the plan created above to provision the infrastructure in the test account.
+- destroy - This stage destroys the infrastructure created in the above stage.
+Running these four stages ensures the integrity of the terraform configurations.
 
 ## Directory Structure
 ```shell
@@ -113,16 +121,16 @@ Alternatively, use the _**create_new_role = false**_ option to use an existing I
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
-| Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 3.66.0 |
+| Name | Version   |
+|------|-----------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | \>= 1.0.0 |
+
 
 ## Providers
 
-| Name | Version |
-|------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.14.0 |
+| Name | Version    |
+|------|------------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | \>= 4.20.1 |
 
 ## Modules
 

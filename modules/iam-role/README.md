@@ -43,4 +43,5 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_role_arn"></a> [role\_arn](#output\_role\_arn) | The ARN of the IAM Role |
+| <a name="output_role_name"></a> [role\_name](#output\_role\_name) | The ARN of the IAM Role |
 <!-- END_TF_DOCS -->

@@ -30,6 +30,7 @@ EOF
 }
 
 resource "aws_codecommit_approval_rule_template_association" "source_repository_approval_association" {
+  count                       = var.create_new_repo ? 1 : 0
   approval_rule_template_name = aws_codecommit_approval_rule_template.source_repository_approval[0].name
   repository_name             = aws_codecommit_repository.source_repository[0].repository_name
 }

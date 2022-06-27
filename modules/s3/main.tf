@@ -78,7 +78,7 @@ resource "aws_iam_role_policy_attachment" "replication_s3_role_attach" {
 #Replication bucket
 resource "aws_s3_bucket" "replication_bucket" {
   provider      = aws.replication
-  bucket_prefix = "${regex("[a-z0-9.-]+", lower(var.project_name))}-replication"
+  bucket_prefix = "${regex("[a-z0-9.-]+", lower(var.project_name))}-rpl"
 }
 
 resource "aws_s3_bucket_public_access_block" "replication_bucket_access" {
@@ -88,6 +88,38 @@ resource "aws_s3_bucket_public_access_block" "replication_bucket_access" {
   restrict_public_buckets = true
   block_public_acls       = true
   block_public_policy     = true
+}
+
+resource "aws_s3_bucket_policy" "bucket_policy_replication_bucket" {
+  provider = aws.replication
+  bucket   = aws_s3_bucket.replication_bucket.id
+  policy   = data.aws_iam_policy_document.bucket_policy_doc_replication_bucket.json
+}
+
+data "aws_iam_policy_document" "bucket_policy_doc_replication_bucket" {
+  provider = aws.replication
+  statement {
+    principals {
+      type        = "AWS"
+      identifiers = [var.codepipeline_role_arn]
+    }
+
+    actions = [
+      "s3:Get*",
+      "s3:List*",
+      "s3:ReplicateObject",
+      "s3:PutObject",
+      "s3:RestoreObject",
+      "s3:PutObjectVersionTagging",
+      "s3:PutObjectTagging",
+      "s3:PutObjectAcl"
+    ]
+
+    resources = [
+      aws_s3_bucket.replication_bucket.arn,
+      "${aws_s3_bucket.replication_bucket.arn}/*",
+    ]
+  }
 }
 
 resource "aws_s3_bucket_acl" "replication_bucket_acl" {
@@ -137,6 +169,36 @@ resource "aws_s3_bucket_public_access_block" "codepipeline_bucket_access" {
   restrict_public_buckets = true
   block_public_acls       = true
   block_public_policy     = true
+}
+
+resource "aws_s3_bucket_policy" "bucket_policy_codepipeline_bucket" {
+  bucket = aws_s3_bucket.codepipeline_bucket.id
+  policy = data.aws_iam_policy_document.bucket_policy_doc_codepipeline_bucket.json
+}
+
+data "aws_iam_policy_document" "bucket_policy_doc_codepipeline_bucket" {
+  statement {
+    principals {
+      type        = "AWS"
+      identifiers = [var.codepipeline_role_arn]
+    }
+
+    actions = [
+      "s3:Get*",
+      "s3:List*",
+      "s3:ReplicateObject",
+      "s3:PutObject",
+      "s3:RestoreObject",
+      "s3:PutObjectVersionTagging",
+      "s3:PutObjectTagging",
+      "s3:PutObjectAcl"
+    ]
+
+    resources = [
+      aws_s3_bucket.codepipeline_bucket.arn,
+      "${aws_s3_bucket.codepipeline_bucket.arn}/*",
+    ]
+  }
 }
 
 resource "aws_s3_bucket_acl" "codepipeline_bucket_acl" {
