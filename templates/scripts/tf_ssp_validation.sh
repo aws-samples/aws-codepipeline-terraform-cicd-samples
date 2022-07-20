@@ -50,7 +50,6 @@ then
     echo "## VALIDATION : Running tfsec ..."
     #tfsec .
     tfsec ./ --format junit --out tfsec-junit.xml
-    ls
 fi
 tfTfsecOutput=$?
 
