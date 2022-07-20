@@ -23,9 +23,9 @@ phases:
   build:
     commands:
       - "cd ${CODEBUILD_SRC_DIR}/${CODE_SRC_DIR}"
-      - "echo ## TERRAFORM INIT : Initialize the Terraform Workspace"
-      - "terraform init"
-      - "echo ## TERRAFORM PLAN : Generate the Terraform Plan"
-      - "terraform plan -out tfapply"
       - "echo ## TERRAFORM APPLY : Starting with the Terraform Apply"
       - "terraform apply -input=false tfapply"
+
+artifacts:
+  files:
+    - '**/*'
