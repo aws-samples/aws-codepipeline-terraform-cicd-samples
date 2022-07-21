@@ -69,7 +69,7 @@ Running these four stages ensures the integrity of the terraform configurations.
 
 #### Step 1: Clone this repository.
 
-```
+```shell
 git@github.com:aws-samples/aws-codepipeline-terraform-cicd-samples.git
 ```
 Note: If you don't have git installed, [install git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
@@ -88,9 +88,12 @@ Note: If you don't have git installed, [install git](https://git-scm.com/book/en
 
 #### Step 6: Start a Terraform run using the command terraform apply
 
-Note: Sample terraform.tfvars are available in the examples directory
+Note: Sample terraform.tfvars are available in the examples directory. You may use the below command if you need to provide this sample tfvars as an input to the apply command.
+```shell
+terraform apply -var-file=./examples/terraform.tfvars
+```
 
-##Pre-Requisites
+## Pre-Requisites
 
 #### Step 1: You would get source_repo_clone_url_http as an output of the installation step. Clone the repository to your local.
 
@@ -98,14 +101,17 @@ git clone <source_repo_clone_url_http>
 
 #### Step 2: Clone this repository.
 
-```
+```shell
 git@github.com:aws-samples/aws-eks-accelerator-for-terraform.git
 ```
 Note: If you don't have git installed, [install git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 
 #### Step 3: Copy the templates folder to the AWS CodeCommit sourcecode repository which contains the terraform code to be deployed.
-    cd examples/ci-cd/aws-codepipeline
-    cp -r templates $YOUR_CODECOMMIT_REPO_ROOT
+```shell
+cd examples/ci-cd/aws-codepipeline
+cp -r templates $YOUR_CODECOMMIT_REPO_ROOT
+```
+
 
 #### Step 4: Update the variables in the template files with appropriate values and push the same.
 

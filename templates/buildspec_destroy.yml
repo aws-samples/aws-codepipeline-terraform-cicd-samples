@@ -24,6 +24,8 @@ phases:
   build:
     commands:
       - "cd ${CODEBUILD_SRC_DIR}/${CODE_SRC_DIR}"
-      - "echo ## TERRAFORM DESTROY : Destroying the Terraform infrastructure"
-      - "terraform init"
       - "terraform destroy --auto-approve"
+
+artifacts:
+  files:
+    - '**/*'
