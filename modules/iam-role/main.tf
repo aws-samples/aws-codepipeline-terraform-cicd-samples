@@ -1,5 +1,5 @@
 #This solution, non-production-ready template describes AWS Codepipeline based CICD Pipeline for terraform code deployment.
-#© 2022 Amazon Web Services, Inc. or its affiliates. All Rights Reserved.
+#© 2023 Amazon Web Services, Inc. or its affiliates. All Rights Reserved.
 #This AWS Content is provided subject to the terms of the AWS Customer Agreement available at
 #http://aws.amazon.com/agreement or other written agreement between Customer and either
 #Amazon Web Services, Inc. or Amazon Web Services EMEA SARL or both.
@@ -125,11 +125,4 @@ resource "aws_iam_role_policy_attachment" "codepipeline_role_attach" {
   count      = var.create_new_role ? 1 : 0
   role       = aws_iam_role.codepipeline_role[0].name
   policy_arn = aws_iam_policy.codepipeline_policy[0].arn
-}
-
-resource "aws_accessanalyzer_analyzer" "codepipeline_analyzer" {
-  count         = var.create_new_role ? 1 : 0
-  analyzer_name = "${var.project_name}-iam-analyzer"
-  type          = "ACCOUNT"
-  tags          = var.tags
 }

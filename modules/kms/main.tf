@@ -1,5 +1,5 @@
 #This solution, non-production-ready template describes AWS Codepipeline based CICD Pipeline for terraform code deployment.
-#© 2022 Amazon Web Services, Inc. or its affiliates. All Rights Reserved.
+#© 2023 Amazon Web Services, Inc. or its affiliates. All Rights Reserved.
 #This AWS Content is provided subject to the terms of the AWS Customer Agreement available at
 #http://aws.amazon.com/agreement or other written agreement between Customer and either
 #Amazon Web Services, Inc. or Amazon Web Services EMEA SARL or both.
@@ -21,6 +21,8 @@ data "aws_iam_policy_document" "kms_key_policy_doc" {
     sid       = "Enable IAM User Permissions"
     effect    = "Allow"
     actions   = ["kms:*"]
+    #checkov:skip=CKV_AWS_111:Without this statement, KMS key cannot be managed by root
+    #checkov:skip=CKV_AWS_109:Without this statement, KMS key cannot be managed by root
     resources = ["*"]
 
     principals {

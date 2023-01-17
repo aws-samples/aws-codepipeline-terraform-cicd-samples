@@ -1,5 +1,5 @@
 #This solution, non-production-ready template describes AWS Codepipeline based CICD Pipeline for terraform code deployment.
-#© 2022 Amazon Web Services, Inc. or its affiliates. All Rights Reserved.
+#© 2023 Amazon Web Services, Inc. or its affiliates. All Rights Reserved.
 #This AWS Content is provided subject to the terms of the AWS Customer Agreement available at
 #http://aws.amazon.com/agreement or other written agreement between Customer and either
 #Amazon Web Services, Inc. or Amazon Web Services EMEA SARL or both.
@@ -14,10 +14,6 @@ terraform {
     }
   }
 
-}
-
-provider "aws" {
-  region = "us-east-2"
 }
 
 #Module for creating a new S3 bucket for storing pipeline artifacts
@@ -94,6 +90,7 @@ module "codepipeline_kms" {
 module "codepipeline_iam_role" {
   source                     = "./modules/iam-role"
   project_name               = var.project_name
+  create_new_role            = var.create_new_role
   codepipeline_iam_role_name = var.create_new_role == true ? "${var.project_name}-codepipeline-role" : var.codepipeline_iam_role_name
   source_repository_name     = var.source_repo_name
   kms_key_arn                = module.codepipeline_kms.arn
