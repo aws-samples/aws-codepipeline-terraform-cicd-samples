@@ -37,10 +37,17 @@ variable "source_repo_branch" {
   type        = string
 }
 
+variable "source_repo_description" {
+  type        = string
+  description = "Description of the Source CodeCommit repository used in pipeline"
+}
+
+/*
 variable "repo_approvers_arn" {
   description = "ARN or ARN pattern for the IAM User/Role/Group that can be used for approving Pull Requests"
   type        = string
-}
+} 
+*/
 
 variable "environment" {
   description = "Environment in which the script is run. Eg: dev, prod, etc"
@@ -48,6 +55,11 @@ variable "environment" {
 }
 
 variable "stage_input" {
+  description = "Tags to be attached to the CodePipeline"
+  type        = list(map(any))
+}
+
+variable "stage_destroy_input" {
   description = "Tags to be attached to the CodePipeline"
   type        = list(map(any))
 }
