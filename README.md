@@ -75,7 +75,7 @@ git@github.com:aws-samples/aws-codepipeline-terraform-cicd-samples.git
 Note: If you don't have git installed, [install git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 
 
-#### Step 2: Update the variables in `examples/terraform.tfvars` based on your requirement. Make sure you ae updating the variables project_name, environment, source_repo_name, source_repo_branch, create_new_repo, stage_input and build_projects.
+#### Step 2: Update the variables in `examples/terraform.tfvars` based on your requirement. Make sure you are updating the variables project_name, environment, source_repo_name, source_repo_branch, create_new_repo, stage_input and build_projects.
 
 - If you are planning to use an existing terraform CodeCommit repository, then update the variable create_new_repo as false and provide the name of your existing repo under the variable source_repo_name
 - If you are planning to create new terraform CodeCommit repository, then update the variable create_new_repo as true and provide the name of your new repo under the variable source_repo_name
