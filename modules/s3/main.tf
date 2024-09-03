@@ -117,12 +117,6 @@ data "aws_iam_policy_document" "bucket_policy_doc_replication_bucket" {
   }
 }
 
-resource "aws_s3_bucket_acl" "replication_bucket_acl" {
-  provider = aws.replication
-  bucket   = aws_s3_bucket.replication_bucket.id
-  acl      = "private"
-}
-
 resource "aws_s3_bucket_versioning" "replication_bucket_versioning" {
   provider = aws.replication
   bucket   = aws_s3_bucket.replication_bucket.id
@@ -194,11 +188,6 @@ data "aws_iam_policy_document" "bucket_policy_doc_codepipeline_bucket" {
       "${aws_s3_bucket.codepipeline_bucket.arn}/*",
     ]
   }
-}
-
-resource "aws_s3_bucket_acl" "codepipeline_bucket_acl" {
-  bucket = aws_s3_bucket.codepipeline_bucket.id
-  acl    = "private"
 }
 
 resource "aws_s3_bucket_versioning" "codepipeline_bucket_versioning" {
