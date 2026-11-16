@@ -1,8 +1,5 @@
-#This solution, non-production-ready template describes AWS Codepipeline based CICD Pipeline for terraform code deployment.
-#© 2023 Amazon Web Services, Inc. or its affiliates. All Rights Reserved.
-#This AWS Content is provided subject to the terms of the AWS Customer Agreement available at
-#http://aws.amazon.com/agreement or other written agreement between Customer and either
-#Amazon Web Services, Inc. or Amazon Web Services EMEA SARL or both.
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 
 resource "aws_iam_role" "codepipeline_role" {
   count              = var.create_new_role ? 1 : 0
@@ -32,7 +29,6 @@ EOF
   path               = "/"
 }
 
-# TO-DO : replace all * with resource names / arn
 resource "aws_iam_policy" "codepipeline_policy" {
   count       = var.create_new_role ? 1 : 0
   name        = "${var.project_name}-codepipeline-policy"
@@ -74,9 +70,7 @@ resource "aws_iam_policy" "codepipeline_policy" {
       "Effect": "Allow",
       "Action": [
          "codecommit:GitPull",
-         "codecommit:GitPush",
          "codecommit:GetBranch",
-         "codecommit:CreateCommit",
          "codecommit:ListRepositories",
          "codecommit:BatchGetCommits",
          "codecommit:BatchGetRepositories",
@@ -86,7 +80,7 @@ resource "aws_iam_policy" "codepipeline_policy" {
          "codecommit:ListBranches",
          "codecommit:UploadArchive"
       ],
-      "Resource": "arn:aws:codecommit:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:${var.source_repository_name}"
+      "Resource": "arn:${data.aws_partition.current.partition}:codecommit:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:${var.source_repository_name}"
     },
     {
       "Effect": "Allow",
@@ -95,7 +89,7 @@ resource "aws_iam_policy" "codepipeline_policy" {
         "codebuild:StartBuild",
         "codebuild:BatchGetProjects"
       ],
-      "Resource": "arn:aws:codebuild:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:project/${var.project_name}*"
+      "Resource": "arn:${data.aws_partition.current.partition}:codebuild:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:project/${var.project_name}*"
     },
     {
       "Effect": "Allow",
@@ -105,7 +99,7 @@ resource "aws_iam_policy" "codepipeline_policy" {
         "codebuild:UpdateReport",
         "codebuild:BatchPutTestCases"
       ],
-      "Resource": "arn:aws:codebuild:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:report-group/${var.project_name}*"
+      "Resource": "arn:${data.aws_partition.current.partition}:codebuild:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:report-group/${var.project_name}*"
     },
     {
       "Effect": "Allow",
@@ -114,7 +108,10 @@ resource "aws_iam_policy" "codepipeline_policy" {
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ],
-      "Resource": "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:*"
+      "Resource": [
+        "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/codebuild/${var.project_name}-*",
+        "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/codebuild/${var.project_name}-*:log-stream:*"
+      ]
     }
   ]
 }

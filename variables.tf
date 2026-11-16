@@ -1,8 +1,5 @@
-#This solution, non-production-ready template describes AWS Codepipeline based CICD Pipeline for terraform code deployment.
-#© 2023 Amazon Web Services, Inc. or its affiliates. All Rights Reserved.
-#This AWS Content is provided subject to the terms of the AWS Customer Agreement available at
-#http://aws.amazon.com/agreement or other written agreement between Customer and either
-#Amazon Web Services, Inc. or Amazon Web Services EMEA SARL or both.
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 
 variable "project_name" {
   description = "Unique name for this project"
@@ -48,17 +45,17 @@ variable "environment" {
 }
 
 variable "stage_input" {
-  description = "Tags to be attached to the CodePipeline"
+  description = "List of pipeline stages. Each stage has a name, category, owner, provider, input_artifacts and output_artifacts"
   type        = list(map(any))
 }
 
 variable "build_projects" {
-  description = "Tags to be attached to the CodePipeline"
+  description = "Names of the CodeBuild projects to create. Each name must match a templates/buildspec_<name>.yml file"
   type        = list(string)
 }
 
 variable "builder_compute_type" {
-  description = "Relative path to the Apply and Destroy build spec file"
+  description = "Compute type of the CodeBuild projects"
   type        = string
   default     = "BUILD_GENERAL1_SMALL"
 }
@@ -66,7 +63,7 @@ variable "builder_compute_type" {
 variable "builder_image" {
   description = "Docker Image to be used by codebuild"
   type        = string
-  default     = "aws/codebuild/amazonlinux2-x86_64-standard:3.0"
+  default     = "aws/codebuild/amazonlinux-x86_64-standard:5.0"
 }
 
 variable "builder_type" {
@@ -82,7 +79,7 @@ variable "builder_image_pull_credentials_type" {
 }
 
 variable "build_project_source" {
-  description = "aws/codebuild/standard:4.0"
+  description = "Source and artifacts type of the CodeBuild projects"
   type        = string
   default     = "CODEPIPELINE"
 }

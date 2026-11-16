@@ -1,18 +1,13 @@
-#This solution, non-production-ready template describes AWS Codepipeline based CICD Pipeline for terraform code deployment.
-#© 2023 Amazon Web Services, Inc. or its affiliates. All Rights Reserved.
-#This AWS Content is provided subject to the terms of the AWS Customer Agreement available at
-#http://aws.amazon.com/agreement or other written agreement between Customer and either
-#Amazon Web Services, Inc. or Amazon Web Services EMEA SARL or both.
-
 #!/bin/bash
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 
-# Accept Command Line Arguments
+# Arguments, each "Y" or "N": skip failures, terraform validate, terraform fmt, checkov, Trivy
 SKIPVALIDATIONFAILURE=$1
 tfValidate=$2
 tfFormat=$3
 tfCheckov=$4
-tfTfsec=$5
-# -----------------------------
+tfTrivy=$5
 
 echo "### VALIDATION Overview ###"
 echo "-------------------------"
@@ -20,56 +15,60 @@ echo "Skip Validation Errors on Failure : ${SKIPVALIDATIONFAILURE}"
 echo "Terraform Validate : ${tfValidate}"
 echo "Terraform Format   : ${tfFormat}"
 echo "Terraform checkov  : ${tfCheckov}"
-echo "Terraform tfsec    : ${tfTfsec}"
+echo "Terraform Trivy    : ${tfTrivy}"
 echo "------------------------"
-terraform init
-if (( ${tfValidate} == "Y"))
-then
-    echo "## VALIDATION : Validating Terraform code ..."
-    terraform validate
-fi
-tfValidateOutput=$?
 
-if (( ${tfFormat} == "Y"))
-then
-    echo "## VALIDATION : Formatting Terraform code ..."
-    terraform fmt -recursive
-fi
-tfFormatOutput=$?
+# Exit codes of the checks. 0 means the check passed or was turned off.
+tfValidateOutput=0
+tfFormatOutput=0
+tfCheckovOutput=0
+tfTrivyOutput=0
 
-if (( ${tfCheckov} == "Y"))
-then
-    echo "## VALIDATION : Running checkov ..."
-    #checkov -s -d .
-    checkov -o junitxml --framework terraform -d ./ >checkov.xml
+if [ "${tfValidate}" = "Y" ]; then
+  echo "## VALIDATION : Validating Terraform code ..."
+  terraform validate
+  tfValidateOutput=$?
 fi
-tfCheckovOutput=$?
 
-if (( ${tfTfsec} == "Y"))
-then
-    echo "## VALIDATION : Running tfsec ..."
-    #tfsec .
-    tfsec ./ --format junit --out tfsec-junit.xml
+if [ "${tfFormat}" = "Y" ]; then
+  echo "## VALIDATION : Checking Terraform formatting ..."
+  terraform fmt -check -recursive
+  tfFormatOutput=$?
 fi
-tfTfsecOutput=$?
+
+if [ "${tfCheckov}" = "Y" ]; then
+  echo "## VALIDATION : Running checkov ..."
+  checkov -o junitxml --framework terraform -d ./ >checkov.xml
+  tfCheckovOutput=$?
+fi
+
+if [ "${tfTrivy}" = "Y" ]; then
+  echo "## VALIDATION : Running Trivy ..."
+  trivy config --severity HIGH,CRITICAL --exit-code 1 \
+    --format template --template "@/usr/local/share/trivy/templates/junit.tpl" \
+    --output trivy-junit.xml ./
+  tfTrivyOutput=$?
+fi
+
+# The buildspec copies these report files, so make sure they exist when a check was turned off.
+[ -f checkov.xml ] || echo '<testsuites/>' >checkov.xml
+[ -f trivy-junit.xml ] || echo '<testsuites/>' >trivy-junit.xml
 
 echo "## VALIDATION Summary ##"
 echo "------------------------"
 echo "Terraform Validate : ${tfValidateOutput}"
 echo "Terraform Format   : ${tfFormatOutput}"
 echo "Terraform checkov  : ${tfCheckovOutput}"
-echo "Terraform tfsec    : ${tfTfsecOutput}"
+echo "Terraform Trivy    : ${tfTrivyOutput}"
 echo "------------------------"
 
-if (( ${SKIPVALIDATIONFAILURE} == "Y" ))
-then
-  #if SKIPVALIDATIONFAILURE is set as Y, then validation failures are skipped during execution
-  echo "## VALIDATION : Skipping validation failure checks..."
-elif (( $tfValidateOutput == 0 && $tfFormatOutput == 0 && $tfCheckovOutput == 0  && $tfTfsecOutput == 0 ))
-then
+if [ $((tfValidateOutput + tfFormatOutput + tfCheckovOutput + tfTrivyOutput)) -eq 0 ]; then
   echo "## VALIDATION : Checks Passed!!!"
+elif [ "${SKIPVALIDATIONFAILURE}" = "Y" ]; then
+  # With SKIPVALIDATIONFAILURE set to Y, failed checks are reported but do not stop the build.
+  echo "## VALIDATION : Skipping validation failure checks..."
 else
-  # When validation checks fails, build process is halted.
+  # When validation checks fail, the build process is halted.
   echo "## ERROR : Validation Failed"
-  exit 1;
+  exit 1
 fi

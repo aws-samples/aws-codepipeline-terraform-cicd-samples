@@ -1,51 +1,53 @@
-#This solution, non-production-ready template describes AWS Codepipeline based CICD Pipeline for terraform code deployment.
-#© 2023 Amazon Web Services, Inc. or its affiliates. All Rights Reserved.
-#This AWS Content is provided subject to the terms of the AWS Customer Agreement available at
-#http://aws.amazon.com/agreement or other written agreement between Customer and either
-#Amazon Web Services, Inc. or Amazon Web Services EMEA SARL or both.
-
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+# Terraform validate stage.
+# To change TF_VERSION, also update TF_SHA256 with the checksum for terraform_<version>_linux_amd64.zip
+# from https://releases.hashicorp.com/terraform/<version>/terraform_<version>_SHA256SUMS
 version: 0.2
-
 env:
   variables:
     CODE_SRC_DIR: "."
+    TF_VERSION: "1.17.2"
+    TF_SHA256: "e6f16b2f0b137ee5729caa8c4e79a3bae4ee261acd198a1fcfa8584a6296605b"
     SCRIPT_DIR: "./templates/scripts"
-    TF_VERSION: "1.3.7"
     ENVIRONMENT: "dev"
     SKIPVALIDATIONFAILURE: "Y"
     ENABLE_TFVALIDATE: "Y"
     ENABLE_TFFORMAT: "Y"
     ENABLE_TFCHECKOV: "Y"
-    ENABLE_TFSEC: "Y"
-    TFSEC_VERSION: "v1.28.1"
-
+    ENABLE_TRIVY: "Y"
+    CHECKOV_VERSION: "3.4.5"
+    TRIVY_VERSION: "v0.76.2"
+    TRIVY_SHA256: "bc0fc726e017b8927a62b2d3531d7a84ee01769daf5c99ed866dced54089fdbf"
 phases:
   install:
     runtime-versions:
-      python: 3.9
-      golang: 1.14
+      python: 3.12
     commands:
-      - "curl -s -qL -o terraform.zip https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
-      - "unzip -o terraform.zip"
-      - "mv terraform /bin"
+      - "curl -sSfL -o terraform.zip https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
+      - "echo \"${TF_SHA256}  terraform.zip\" | sha256sum -c -"
+      - "unzip -o terraform.zip terraform"
+      - "mv terraform /usr/local/bin/terraform"
       - "rm terraform.zip"
-      - "yum update -y"
-      - "yum install -y curl jq awscli"
-      - "pip3 install checkov"
-      - "yum install -y golang"
-      - "wget -q -O tfsec https://github.com/aquasecurity/tfsec/releases/download/${TFSEC_VERSION}/tfsec-linux-amd64"
-      - "chmod +x ./tfsec"
-      - "mv ./tfsec /usr/local/bin/tfsec"
+      - "python3 -m venv /opt/checkov-venv"
+      - "/opt/checkov-venv/bin/pip install --quiet checkov==${CHECKOV_VERSION}"
+      - "ln -s /opt/checkov-venv/bin/checkov /usr/local/bin/checkov"
+      - "curl -sSfL -o trivy.tar.gz https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/trivy_${TRIVY_VERSION#v}_Linux-64bit.tar.gz"
+      - "echo \"${TRIVY_SHA256}  trivy.tar.gz\" | sha256sum -c -"
+      - "mkdir -p /usr/local/share/trivy/templates"
+      - "tar -xzf trivy.tar.gz -C /usr/local/bin trivy"
+      - "tar -xzf trivy.tar.gz --strip-components=1 -C /usr/local/share/trivy/templates contrib/junit.tpl"
+      - "rm trivy.tar.gz"
   build:
     commands:
       - "cd ${CODEBUILD_SRC_DIR}/${CODE_SRC_DIR}"
       - "echo ## TERRAFORM INIT : Initialize the Terraform Workspace"
-      - "terraform init"
+      - "terraform init -input=false"
       - "echo ## VALIDATION : Starting ..."
       - "mkdir -p ${CODEBUILD_SRC_DIR}/reports"
-      - "/bin/bash ${CODEBUILD_SRC_DIR}/${SCRIPT_DIR}/tf_ssp_validation.sh ${SKIPVALIDATIONFAILURE} ${ENABLE_TFVALIDATE} ${ENABLE_TFFORMAT} ${ENABLE_TFCHECKOV} ${ENABLE_TFSEC}"
+      - "/bin/bash ${CODEBUILD_SRC_DIR}/${SCRIPT_DIR}/tf_ssp_validation.sh ${SKIPVALIDATIONFAILURE} ${ENABLE_TFVALIDATE} ${ENABLE_TFFORMAT} ${ENABLE_TFCHECKOV} ${ENABLE_TRIVY}"
       - "cp checkov.xml ${CODEBUILD_SRC_DIR}/reports/checkov.xml"
-      - "cp tfsec-junit.xml ${CODEBUILD_SRC_DIR}/reports/tfsec-junit.xml"
+      - "cp trivy-junit.xml ${CODEBUILD_SRC_DIR}/reports/trivy-junit.xml"
 artifacts:
   files:
     - '**/*'
@@ -54,7 +56,7 @@ reports:
     files:
       - "./reports/checkov.xml"
     file-format: "JUNITXML"
-  tfsec-reports:
+  trivy-reports:
     files:
-      - "./reports/tfsec-junit.xml"
+      - "./reports/trivy-junit.xml"
     file-format: "JUNITXML"

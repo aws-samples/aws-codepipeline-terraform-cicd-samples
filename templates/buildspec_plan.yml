@@ -1,30 +1,30 @@
-#This solution, non-production-ready template describes AWS Codepipeline based CICD Pipeline for terraform code deployment.
-#© 2023 Amazon Web Services, Inc. or its affiliates. All Rights Reserved.
-#This AWS Content is provided subject to the terms of the AWS Customer Agreement available at
-#http://aws.amazon.com/agreement or other written agreement between Customer and either
-#Amazon Web Services, Inc. or Amazon Web Services EMEA SARL or both.
-
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+# Terraform plan stage.
+# To change TF_VERSION, also update TF_SHA256 with the checksum for terraform_<version>_linux_amd64.zip
+# from https://releases.hashicorp.com/terraform/<version>/terraform_<version>_SHA256SUMS
 version: 0.2
-
 env:
   variables:
     CODE_SRC_DIR: "."
-    TF_VERSION: "1.3.7"
-
+    TF_VERSION: "1.17.2"
+    TF_SHA256: "e6f16b2f0b137ee5729caa8c4e79a3bae4ee261acd198a1fcfa8584a6296605b"
 phases:
   install:
     runtime-versions:
-      python: 3.9
+      python: 3.12
     commands:
-      - "curl -s -qL -o terraform.zip https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
-      - "unzip -o terraform.zip"
-      - "mv terraform /bin"
+      - "curl -sSfL -o terraform.zip https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
+      - "echo \"${TF_SHA256}  terraform.zip\" | sha256sum -c -"
+      - "unzip -o terraform.zip terraform"
+      - "mv terraform /usr/local/bin/terraform"
       - "rm terraform.zip"
   build:
     commands:
       - "cd ${CODEBUILD_SRC_DIR}/${CODE_SRC_DIR}"
       - "echo ## TERRAFORM PLAN : Generate the Terraform Plan"
-      - "terraform plan -out tfapply"
+      - "terraform init -input=false"
+      - "terraform plan -input=false -out tfapply"
 artifacts:
   files:
     - '**/*'

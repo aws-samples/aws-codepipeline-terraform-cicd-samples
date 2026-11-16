@@ -1,8 +1,5 @@
-#This solution, non-production-ready template describes AWS Codepipeline based CICD Pipeline for terraform code deployment.
-#© 2023 Amazon Web Services, Inc. or its affiliates. All Rights Reserved.
-#This AWS Content is provided subject to the terms of the AWS Customer Agreement available at
-#http://aws.amazon.com/agreement or other written agreement between Customer and either
-#Amazon Web Services, Inc. or Amazon Web Services EMEA SARL or both.
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 
 resource "aws_iam_role" "replication_s3_role" {
   name = "${var.project_name}-replication-role"
@@ -72,8 +69,11 @@ resource "aws_iam_role_policy_attachment" "replication_s3_role_attach" {
 
 #Replication bucket
 resource "aws_s3_bucket" "replication_bucket" {
+  #checkov:skip=CKV2_AWS_62:Event notifications are not required for this sample
   provider      = aws.replication
   bucket_prefix = "${regex("[a-z0-9.-]+", lower(var.project_name))}-rpl"
+  force_destroy = true
+  tags          = var.tags
 }
 
 resource "aws_s3_bucket_public_access_block" "replication_bucket_access" {
@@ -115,12 +115,29 @@ data "aws_iam_policy_document" "bucket_policy_doc_replication_bucket" {
       "${aws_s3_bucket.replication_bucket.arn}/*",
     ]
   }
+  statement {
+    sid       = "DenyInsecureTransport"
+    effect    = "Deny"
+    actions   = ["s3:*"]
+    resources = [aws_s3_bucket.replication_bucket.arn, "${aws_s3_bucket.replication_bucket.arn}/*"]
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["false"]
+    }
+  }
 }
 
-resource "aws_s3_bucket_acl" "replication_bucket_acl" {
+resource "aws_s3_bucket_ownership_controls" "replication_bucket_ownership" {
   provider = aws.replication
   bucket   = aws_s3_bucket.replication_bucket.id
-  acl      = "private"
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
 }
 
 resource "aws_s3_bucket_versioning" "replication_bucket_versioning" {
@@ -147,12 +164,13 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "replication_bucke
 resource "aws_s3_bucket_logging" "replication_bucket_logging" {
   provider      = aws.replication
   bucket        = aws_s3_bucket.replication_bucket.id
-  target_bucket = aws_s3_bucket.replication_bucket.id
+  target_bucket = module.replication_access_logs.bucket
   target_prefix = "log/"
 }
 
 #Artifact Bucket
 resource "aws_s3_bucket" "codepipeline_bucket" {
+  #checkov:skip=CKV2_AWS_62:Event notifications are not required for this sample
   bucket_prefix = regex("[a-z0-9.-]+", lower(var.project_name))
   tags          = var.tags
   force_destroy = true
@@ -194,11 +212,28 @@ data "aws_iam_policy_document" "bucket_policy_doc_codepipeline_bucket" {
       "${aws_s3_bucket.codepipeline_bucket.arn}/*",
     ]
   }
+  statement {
+    sid       = "DenyInsecureTransport"
+    effect    = "Deny"
+    actions   = ["s3:*"]
+    resources = [aws_s3_bucket.codepipeline_bucket.arn, "${aws_s3_bucket.codepipeline_bucket.arn}/*"]
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["false"]
+    }
+  }
 }
 
-resource "aws_s3_bucket_acl" "codepipeline_bucket_acl" {
+resource "aws_s3_bucket_ownership_controls" "codepipeline_bucket_ownership" {
   bucket = aws_s3_bucket.codepipeline_bucket.id
-  acl    = "private"
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
 }
 
 resource "aws_s3_bucket_versioning" "codepipeline_bucket_versioning" {
@@ -222,7 +257,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "codepipeline_buck
 
 resource "aws_s3_bucket_logging" "codepipeline_bucket_logging" {
   bucket        = aws_s3_bucket.codepipeline_bucket.id
-  target_bucket = aws_s3_bucket.codepipeline_bucket.id
+  target_bucket = module.access_logs.bucket
   target_prefix = "log/"
 }
 
@@ -250,4 +285,54 @@ resource "aws_s3_bucket_replication_configuration" "replication_config" {
       storage_class = "STANDARD"
     }
   }
+}
+resource "aws_s3_bucket_lifecycle_configuration" "codepipeline_bucket_lifecycle" {
+  bucket     = aws_s3_bucket.codepipeline_bucket.id
+  depends_on = [aws_s3_bucket_versioning.codepipeline_bucket_versioning]
+  rule {
+    id     = "expire-old-versions"
+    status = "Enabled"
+    filter {}
+    noncurrent_version_expiration {
+      noncurrent_days = 30
+    }
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "replication_bucket_lifecycle" {
+  provider   = aws.replication
+  bucket     = aws_s3_bucket.replication_bucket.id
+  depends_on = [aws_s3_bucket_versioning.replication_bucket_versioning]
+  rule {
+    id     = "expire-old-versions"
+    status = "Enabled"
+    filter {}
+    noncurrent_version_expiration {
+      noncurrent_days = 30
+    }
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+}
+
+# Access log buckets. Each log bucket must be in the same Region as the bucket that it logs.
+module "access_logs" {
+  source            = "../s3-access-logs"
+  bucket_prefix     = regex("[a-z0-9.-]+", lower(var.project_name))
+  source_bucket_arn = aws_s3_bucket.codepipeline_bucket.arn
+  tags              = var.tags
+}
+
+module "replication_access_logs" {
+  source = "../s3-access-logs"
+  providers = {
+    aws = aws.replication
+  }
+  bucket_prefix     = "${regex("[a-z0-9.-]+", lower(var.project_name))}-rpl"
+  source_bucket_arn = aws_s3_bucket.replication_bucket.arn
+  tags              = var.tags
 }

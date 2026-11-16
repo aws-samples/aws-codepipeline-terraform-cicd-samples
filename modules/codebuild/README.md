@@ -6,7 +6,7 @@ No requirements.
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
 
 ## Modules
@@ -16,13 +16,13 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_codebuild_project.terraform_codebuild_project](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codebuild_project) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_build_project_source"></a> [build\_project\_source](#input\_build\_project\_source) | Information about the build output artifact location | `string` | n/a | yes |
 | <a name="input_build_projects"></a> [build\_projects](#input\_build\_projects) | List of Names of the CodeBuild projects to be created | `list(string)` | n/a | yes |
 | <a name="input_builder_compute_type"></a> [builder\_compute\_type](#input\_builder\_compute\_type) | Information about the compute resources the build project will use | `string` | n/a | yes |
@@ -38,7 +38,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_arn"></a> [arn](#output\_arn) | List of ARNs of the CodeBuild projects |
 | <a name="output_id"></a> [id](#output\_id) | List of IDs of the CodeBuild projects |
 | <a name="output_name"></a> [name](#output\_name) | List of Names of the CodeBuild projects |

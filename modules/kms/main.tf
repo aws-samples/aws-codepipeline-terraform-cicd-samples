@@ -1,9 +1,5 @@
-#This solution, non-production-ready template describes AWS Codepipeline based CICD Pipeline for terraform code deployment.
-#© 2023 Amazon Web Services, Inc. or its affiliates. All Rights Reserved.
-#This AWS Content is provided subject to the terms of the AWS Customer Agreement available at
-#http://aws.amazon.com/agreement or other written agreement between Customer and either
-#Amazon Web Services, Inc. or Amazon Web Services EMEA SARL or both.
-
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 locals {
   account_id = data.aws_caller_identity.current.account_id
 }
@@ -17,34 +13,23 @@ resource "aws_kms_key" "encryption_key" {
 }
 
 data "aws_iam_policy_document" "kms_key_policy_doc" {
+  # In a key policy, "*" as the resource means "this key". The account root statement keeps the key
+  # manageable through IAM. The pipeline role gets use and grant permissions only, not key administration.
   statement {
     sid       = "Enable IAM User Permissions"
     effect    = "Allow"
     actions   = ["kms:*"]
-    #checkov:skip=CKV_AWS_111:Without this statement, KMS key cannot be managed by root
-    #checkov:skip=CKV_AWS_109:Without this statement, KMS key cannot be managed by root
     resources = ["*"]
-
     principals {
       type        = "AWS"
-      identifiers = ["arn:aws:iam::${local.account_id}:root"]
+      identifiers = ["arn:${data.aws_partition.current.partition}:iam::${local.account_id}:root"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "aws:PrincipalAccount"
+      values   = [local.account_id]
     }
   }
-
-  statement {
-    sid       = "Allow access for Key Administrators"
-    effect    = "Allow"
-    actions   = ["kms:*"]
-    resources = ["*"]
-
-    principals {
-      type = "AWS"
-      identifiers = [
-        var.codepipeline_role_arn
-      ]
-    }
-  }
-
   statement {
     sid    = "Allow use of the key"
     effect = "Allow"
@@ -56,15 +41,16 @@ data "aws_iam_policy_document" "kms_key_policy_doc" {
       "kms:DescribeKey"
     ]
     resources = ["*"]
-
     principals {
-      type = "AWS"
-      identifiers = [
-        var.codepipeline_role_arn
-      ]
+      type        = "AWS"
+      identifiers = [var.codepipeline_role_arn]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "aws:PrincipalAccount"
+      values   = [local.account_id]
     }
   }
-
   statement {
     sid    = "Allow attachment of persistent resources"
     effect = "Allow"
@@ -74,14 +60,10 @@ data "aws_iam_policy_document" "kms_key_policy_doc" {
       "kms:RevokeGrant"
     ]
     resources = ["*"]
-
     principals {
-      type = "AWS"
-      identifiers = [
-        var.codepipeline_role_arn
-      ]
+      type        = "AWS"
+      identifiers = [var.codepipeline_role_arn]
     }
-
     condition {
       test     = "Bool"
       variable = "kms:GrantIsForAWSResource"
